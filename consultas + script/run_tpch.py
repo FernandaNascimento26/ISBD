@@ -11,7 +11,7 @@ conn_params = {
     "port": 5433,
     "dbname": "tpch",
     "user": "postgres",
-    "password": "nandan24"
+    "password": ""
 }
 
 query_dir = "queries"
