@@ -9,7 +9,7 @@ FROM (
   FROM
     customer
   WHERE
-    SUBSTRING(c_phone FROM 1 FOR 2) IN ('13', '31', '23', '29', '30', '18', '17') -- substituindo :1 a :7
+    SUBSTRING(c_phone FROM 1 FOR 2) IN ('13', '31', '23', '29', '30', '18', '17')
     AND c_acctbal > (
       SELECT
         AVG(c_acctbal)
