@@ -14,7 +14,7 @@ conn_params = {
     "password": "nandan24"
 }
 
-tempo_total = 60  
+tempo_total = 120  # Tempo total do benchmark em segundos  
 
 def executar_benchmark(usuario_id):
     benchmark_results = []
@@ -29,7 +29,7 @@ def executar_benchmark(usuario_id):
     start_global = time.time()
     execucoes = 0
 
-    print(f"\n🚀 [User {usuario_id}] Iniciando benchmark por {tempo_total}s...\n")
+    print(f"\n [User {usuario_id}] Iniciando benchmark por {tempo_total}s...\n")
 
     while time.time() < start_global + tempo_total:
         for qnum in range(1, 23):
@@ -59,7 +59,7 @@ def executar_benchmark(usuario_id):
         execucoes += 1
         tempo_passado = round(time.time() - start_global, 1)
         tempo_restante = round((start_global + tempo_total) - time.time(), 1)
-        print(f"\n⏱ [User {usuario_id}] Execução {execucoes} concluída | Tempo total: {tempo_passado}s | Restante: {tempo_restante}s\n")
+        print(f"\n [User {usuario_id}] Execução {execucoes} concluída | Tempo total: {tempo_passado}s | Restante: {tempo_restante}s\n")
 
     cursor.close()
     conn.close()
