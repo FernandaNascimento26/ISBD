@@ -9,16 +9,16 @@ import os
 conn_params = {
     "host": "localhost",
     "port": 5433,
-    "dbname": "tpch",
+    "dbname": "tpch2",
     "user": "postgres",
-    "password": ""
+    "password": "nandan24"
 }
 
-query_dir = "queries"
-tempo_total = 1800  # 30 minutos
+tempo_total = 60  
 
 def executar_benchmark(usuario_id):
     benchmark_results = []
+
     try:
         conn = psycopg2.connect(**conn_params)
         cursor = conn.cursor()
@@ -29,17 +29,11 @@ def executar_benchmark(usuario_id):
     start_global = time.time()
     execucoes = 0
 
-    print(f"\n [User {usuario_id}] Iniciando benchmark por {tempo_total}s...\n")
+    print(f"\n🚀 [User {usuario_id}] Iniciando benchmark por {tempo_total}s...\n")
 
     while time.time() < start_global + tempo_total:
         for qnum in range(1, 23):
-            query_path = f"{query_dir}/{qnum}.sql"
-            try:
-                with open(query_path, "r", encoding="utf-8") as f:
-                    query_text = f.read()
-            except Exception as e:
-                print(f"[User {usuario_id}] Erro ao ler Q{qnum}: {e}")
-                continue
+            query_text = f"SELECT * FROM q{qnum};"
 
             timestamp_inicio = datetime.now().isoformat()
             start_time = time.time()
@@ -48,7 +42,7 @@ def executar_benchmark(usuario_id):
                 cursor.execute(query_text)
                 cursor.fetchall()
             except Exception as e:
-                print(f"[User {usuario_id}] Erro na Q{qnum}: {e}")
+                print(f"[User {usuario_id}]  Erro na q{qnum}: {e}")
                 conn.rollback()
                 continue
 
@@ -65,7 +59,7 @@ def executar_benchmark(usuario_id):
         execucoes += 1
         tempo_passado = round(time.time() - start_global, 1)
         tempo_restante = round((start_global + tempo_total) - time.time(), 1)
-        print(f"\n [User {usuario_id}] Execução {execucoes} concluída | Tempo total: {tempo_passado}s | Restante: {tempo_restante}s\n")
+        print(f"\n⏱ [User {usuario_id}] Execução {execucoes} concluída | Tempo total: {tempo_passado}s | Restante: {tempo_restante}s\n")
 
     cursor.close()
     conn.close()
@@ -76,9 +70,9 @@ def executar_benchmark(usuario_id):
             writer = csv.writer(f)
             writer.writerow(["benchmark", "query", "n", "tempo_execucao", "timestamp_inicio", "timestamp_fim"])
             writer.writerows(benchmark_results)
-        print(f"\n[User {usuario_id}] Benchmark finalizado. Resultados salvos em: {csv_path}")
+        print(f"\n [User {usuario_id}] Benchmark finalizado. Resultados salvos em: {csv_path}")
     except Exception as e:
-        print(f"[User {usuario_id}] Falha ao salvar CSV: {e}")
+        print(f"[User {usuario_id}]  Falha ao salvar CSV: {e}")
 
 # Criar e iniciar 4 threads
 threads = []
@@ -91,4 +85,4 @@ for i in range(1, 5):
 for t in threads:
     t.join()
 
-print("\n🏁 Todos os usuários concluíram o benchmark.")
+print("\n Todos os usuários concluíram o benchmark.")
