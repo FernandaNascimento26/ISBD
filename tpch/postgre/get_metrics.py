@@ -92,9 +92,9 @@ contagem_segundos = contagem_segundos.reindex(range(0, tempo_maximo_segundos + 1
 
 plt.figure(figsize=(12,6))
 plt.plot(contagem_segundos.index, contagem_segundos.values, marker='o')
-plt.title("Número de transações por segundo")
+plt.title("Vazão das transações")
 plt.xlabel("Tempo (s)")
-plt.ylabel("Transações")
+plt.ylabel("Transações por segundo")
 plt.xlim(0, tempo_maximo_segundos)
 plt.grid(True)
 plt.tight_layout()
