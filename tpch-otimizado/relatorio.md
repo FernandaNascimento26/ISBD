@@ -1,6 +1,6 @@
 
 
-# Análise Comparativa de Desempenho – Benchmark TPC-H/TPC-E
+# Análise Comparativa de Desempenho – Benchmark TPC-H
 
 **PostgreSQL 16 vs SQL Server 2022 – 120s**
 **Configurações Padrão x Ambientes Otimizados**
