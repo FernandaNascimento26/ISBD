@@ -21,7 +21,7 @@ Foram realizados **quatro experimentos**:
 3. PostgreSQL 16 (otimizado)
 4. SQL Server 2022 (otimizado)
 
-O objetivo foi **comparar o desempenho entre SGBDs e avaliar o impacto de otimizações** (principalmente criação de índices e ajustes de configuração) no tempo de execução e na vazão total.
+O objetivo foi **comparar o desempenho entre SGBDs e avaliar o impacto de otimizações** (criação de índices) no tempo de execução e na vazão total.
 
 ---
 
@@ -46,8 +46,8 @@ O objetivo foi **comparar o desempenho entre SGBDs e avaliar o impacto de otimiz
 
 ### Configurações específicas
 
-* **PostgreSQL 16:** Configuração padrão e otimizada (índices + ajustes de buffers e paralelismo)
-* **SQL Server 2022:** Configuração padrão e otimizada (índices + otimizações de execução)
+* **PostgreSQL 16:** Configuração padrão e otimizada (índices)
+* **SQL Server 2022:** Configuração padrão e otimizada (índices)
 
 ---
 
