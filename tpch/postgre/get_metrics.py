@@ -9,15 +9,14 @@ from datetime import datetime
 #  Configurações iniciais
 # ============================
 sns.set(style="whitegrid")
-# Diretório dinâmico: mesma pasta onde está o script
 diretorio = os.path.join(os.path.dirname(os.path.abspath(__file__)))
-quantidade_arquivos = 4  # quantidade de arquivos mais recentes para carregar
-tempo_maximo_segundos = 120  # limite do gráfico de transações por segundo
+quantidade_arquivos = 4  # quantidade de arquivos mais recentes
+tempo_maximo_segundos = 120  # limite do gráfico de TPS
 
 # ============================
 #  Busca automática dos arquivos mais recentes
 # ============================
-padrao_data = re.compile(r'benchmark_tpch_user\d+_(\d{8}_\d{6})\.csv')
+padrao_data = re.compile(r'benchmark_.*?_(\d{8}_\d{6})\.csv')
 
 def extrair_data(nome):
     m = padrao_data.search(nome)
@@ -27,7 +26,7 @@ def extrair_data(nome):
 
 arquivos = [
     arq for arq in os.listdir(diretorio)
-    if arq.startswith("benchmark_tpch_user") and arq.endswith(".csv")
+    if arq.startswith("benchmark_") and arq.endswith(".csv")
 ]
 arquivos.sort(key=lambda x: extrair_data(x) or datetime.min, reverse=True)
 arquivos = arquivos[:quantidade_arquivos]
@@ -42,7 +41,8 @@ print(f"Arquivos carregados: {arquivos}")
 # ============================
 df_list = [pd.read_csv(os.path.join(diretorio, arq)) for arq in arquivos]
 df = pd.concat(df_list, ignore_index=True)
-df["tempo_execucao"] = pd.to_numeric(df["tempo_execucao"], errors="coerce")  # garantir numérico
+df["tempo_execucao"] = pd.to_numeric(df["tempo_execucao"], errors="coerce")
+df["timestamp_inicio"] = pd.to_datetime(df["timestamp_inicio"], errors="coerce")
 
 # ============================
 #  Cálculo das métricas
@@ -54,10 +54,8 @@ tempo_total_minutos = df["tempo_execucao"].sum() / 60
 vazao = execucoes_totais / tempo_total_minutos
 
 # ============================
-#  Criação dos gráficos
+#  Gráfico 1: Tempo médio por query
 # ============================
-
-# --- 1) Gráfico de barras - tempo médio por query ---
 plt.figure(figsize=(12,6))
 sns.barplot(x=resposta_media.index, y=resposta_media.values)
 plt.title("Tempo médio de resposta por query")
@@ -68,7 +66,9 @@ plt.tight_layout()
 plt.savefig(os.path.join(diretorio, "grafico_tempo_resposta.png"))
 plt.close()
 
-# --- 2) Boxplot - distribuição dos tempos por query ---
+# ============================
+#  Gráfico 2: Boxplot dos tempos
+# ============================
 plt.figure(figsize=(12,6))
 sns.boxplot(x="query", y="tempo_execucao", data=df)
 plt.title("Distribuição dos tempos de resposta")
@@ -79,8 +79,14 @@ plt.tight_layout()
 plt.savefig(os.path.join(diretorio, "boxplot_resposta.png"))
 plt.close()
 
-# --- 3) Gráfico de linha - transações por segundo ---
-df['segundo'] = df['tempo_execucao'].astype(int)
+# ============================
+#  Gráfico 3: Transações por segundo
+# ============================
+# Normaliza os timestamps
+tempo_inicial = df["timestamp_inicio"].min()
+df["segundo"] = (df["timestamp_inicio"] - tempo_inicial).dt.total_seconds().astype(int)
+
+# Conta transações por segundo
 contagem_segundos = df['segundo'].value_counts().sort_index()
 contagem_segundos = contagem_segundos.reindex(range(0, tempo_maximo_segundos + 1), fill_value=0)
 
@@ -98,6 +104,6 @@ plt.close()
 # ============================
 #  Saída das métricas
 # ============================
-print("\n Tempo médio por query:\n", resposta_media)
-print("\n Desvio padrão por query:\n", resposta_std)
-print(f"\n Vazão: {vazao:.2f} queries por minuto")
+print("\nTempo médio por query:\n", resposta_media)
+print("\nDesvio padrão por query:\n", resposta_std)
+print(f"\nVazão: {vazao:.2f} queries por minuto")
