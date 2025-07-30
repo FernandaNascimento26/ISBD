@@ -1,4 +1,3 @@
-
 # Análise Comparativa de Desempenho – Benchmark TPC-H (PostgreSQL 16 vs SQL Server 2022 – 120s)
 
 ## 1. Introdução
@@ -74,7 +73,7 @@ O script [`run_tpch.py`](./run_tpch.py) foi utilizado para:
 | Q21   | 1.3839 |
 | Q22   | 0.1915 |
 
-**Vazão:** **34.31 queries por minuto**  
+**Vazão:** **34.31 queries por minuto** (≈ 69 queries processadas em 2 minutos)
 
 #### SQL Server 2022
 | Query | Tempo Médio (s) |
@@ -102,20 +101,51 @@ O script [`run_tpch.py`](./run_tpch.py) foi utilizado para:
 | Q21   | 1.5221 |
 | Q22   | 0.0844 |
 
-**Vazão:** **97.88 queries por minuto**  
+**Vazão:** **97.88 queries por minuto** (≈ 196 queries processadas em 2 minutos)
 
 ---
 
 ### 4.2. Gráficos comparativos
 
 **Tempo médio por query (PostgreSQL vs SQL Server)**  
-![Comparativo de tempos](./comparativo_queries.png)
+![Comparativo de tempos](../comparativo_queries.png)
+
+**Total de queries processadas em 2 minutos**  
+
+SQL Server
+![Comparativo de vazão](./sqlserver/transacoes_por_segundo.png)
+
+Postgre
+
+![Comparativo de vazão](./postgre/transacoes_por_segundo.png)
+
+---
+
+### 4.3. Ranking das queries
+
+#### **Top 5 Queries mais rápidas (por SGBD)**
+| Query | PostgreSQL (s) | SQL Server (s) |
+|-------|----------------|----------------|
+| Q4    | 0.145          | 0.476          |
+| Q22   | 0.191          | 0.084          |
+| Q11   | 0.227          | 0.406          |
+| Q16   | 0.295          | 0.184          |
+| Q14   | 0.317          | 0.513          |
+
+#### **Top 5 Queries mais lentas (por SGBD)**
+| Query | PostgreSQL (s) | SQL Server (s) |
+|-------|----------------|----------------|
+| Q17   | 9.660          | 0.510          |
+| Q9    | 4.303          | 0.899          |
+| Q18   | 3.403          | 0.622          |
+| Q8    | 2.455          | 0.894          |
+| Q19   | 2.397          | 0.514          |
 
 ---
 
 ## 5. Discussão
 - **SQL Server apresentou desempenho consistentemente superior**, com tempos menores em todas as queries do TPC-H.  
-- A **vazão do SQL Server foi quase 3x maior** que a do PostgreSQL (97.88 vs 34.31 queries/min).  
+- A **vazão do SQL Server foi quase 3x maior** que a do PostgreSQL (196 vs 69 queries processadas em 2 minutos).  
 - **Consultas mais custosas** no PostgreSQL (como Q9, Q17 e Q18) tiveram tempos significativamente reduzidos no SQL Server.  
 - O PostgreSQL demonstrou **maior variabilidade nos tempos** de execução, especialmente em consultas complexas.  
 - Ambos os ambientes estavam em **configuração padrão**, o que indica que ainda há margem para otimizações (paralelismo, ajustes de buffers e cache).  
@@ -125,3 +155,4 @@ O script [`run_tpch.py`](./run_tpch.py) foi utilizado para:
 ## 6. Conclusão
 Os experimentos mostraram que o **SQL Server 2022** possui desempenho superior ao **PostgreSQL 16** no benchmark TPC-H em ambiente não otimizado, tanto em **tempo médio por query** quanto em **vazão total**.  
 Esses resultados fornecem um **baseline sólido** para comparações futuras com ambientes ajustados e diferentes fatores de escala.
+
