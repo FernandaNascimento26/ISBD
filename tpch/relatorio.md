@@ -108,7 +108,7 @@ O script [`run_tpch.py`](./run_tpch.py) foi utilizado para:
 ### 4.2. Gráficos comparativos
 
 **Tempo médio por query (PostgreSQL vs SQL Server)**  
-![Comparativo de tempos](../comparativo_queries.png)
+![Comparativo de tempos](./comparativo_queries.png)
 
 **Total de queries processadas em 2 minutos**  
 
