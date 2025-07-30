@@ -1,9 +1,5 @@
-Perfeito! Aqui está o **relatório final** em **Markdown** pronto para o GitHub, com **comparações completas** entre PostgreSQL e SQL Server e **gráficos incorporados**:
 
----
-
-```markdown
-# 🧪 Análise Comparativa de Desempenho – Benchmark TPC-H (PostgreSQL 16 vs SQL Server 2022 – 120s)
+# Análise Comparativa de Desempenho – Benchmark TPC-H (PostgreSQL 16 vs SQL Server 2022 – 120s)
 
 ## 1. Introdução
 Este relatório apresenta os resultados da execução do benchmark **TPC-H** sobre dois Sistemas de Gerenciamento de Banco de Dados (SGBDs):  
@@ -135,9 +131,3 @@ Esses resultados fornecem um **baseline sólido** para comparações futuras com
 ## 7. Apêndices
 - **Apêndice A:** [Script `run_tpch.py`](./run_tpch.py)  
 - **Apêndice B:** [Resultados completos (CSV por usuário)](./csv)  
-```
-
----
-
-Quer que eu **inclua também um ranking das queries mais rápidas e mais lentas** por SGBD (top 5 melhores e piores)?
-E **quer que eu gere os gráficos com cores mais acadêmicas (tons neutros)** para deixar o relatório ainda mais profissional?
