@@ -113,7 +113,7 @@ O script [`run_tpch.py`](./run_tpch.py) foi utilizado para:
 **Total de queries processadas em 2 minutos**  
 
 SQL Server
-![Comparativo de vazão](./sqlserver/transacoes_por_segundo.png)
+![Comparativo de vazão](./sqlServer/transacoes_por_segundo.png)
 
 Postgre
 
