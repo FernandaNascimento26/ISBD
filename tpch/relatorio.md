@@ -125,9 +125,3 @@ O script [`run_tpch.py`](./run_tpch.py) foi utilizado para:
 ## 6. Conclusão
 Os experimentos mostraram que o **SQL Server 2022** possui desempenho superior ao **PostgreSQL 16** no benchmark TPC-H em ambiente não otimizado, tanto em **tempo médio por query** quanto em **vazão total**.  
 Esses resultados fornecem um **baseline sólido** para comparações futuras com ambientes ajustados e diferentes fatores de escala.
-
----
-
-## 7. Apêndices
-- **Apêndice A:** [Script `run_tpch.py`](./run_tpch.py)  
-- **Apêndice B:** [Resultados completos (CSV por usuário)](./csv)  
