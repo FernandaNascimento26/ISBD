@@ -118,6 +118,32 @@ As queries com **maior melhoria** após otimizações no PostgreSQL foram:
 
 ---
 
+
+### Gráficos comparativos
+
+**Tempo médio por query (PostgreSQL vs SQL Server)**  
+![Comparativo de tempos](./TempoPorQuerieTotal.png)
+
+**Total de queries processadas em 2 minutos**  
+
+
+SQL Server não otimizado
+![Comparativo de vazão](../tpch/sqlServer/transacoes_por_segundo.png)
+
+SQL Server Otimizado
+
+![Comparativo de vazão](./sqlServer/transacoes_por_segundo.png)
+
+
+Postgre não otimizado
+![Comparativo de vazão](../tpch/postgre/transacoes_por_segundo.png)
+
+Postgre Otimizado
+
+![Comparativo de vazão](./postgre/transacoes_por_segundo.png)
+
+---
+
 ## 6. Conclusão
 
 * **O SQL Server manteve vantagem em ambiente padrão**, mas o **PostgreSQL otimizado alcançou desempenho equivalente ao SQL Server otimizado** em vazão total.
