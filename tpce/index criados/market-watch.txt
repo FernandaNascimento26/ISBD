@@ -1,0 +1,69 @@
+Para a transação **Market-Watch**, podemos identificar algumas colunas que se beneficiarão de novos índices para melhorar o desempenho das consultas. Vamos analisar cada parte do pseudo-código e sugerir os índices necessários:
+
+### 1. Sugestões de Índices
+
+#### 1.1 Índice para `E_WATCH_ITEM`
+
+```sql
+CREATE INDEX IX_E_WATCH_ITEM_WL_ID_SYMB ON dbo.E_WATCH_ITEM(WI_WL_ID, WI_S_SYMB);
+```
+
+**Justificativa:**
+- **Colunas:** `WI_WL_ID`, `WI_S_SYMB`
+- **Uso:** Este índice melhora as consultas que envolvem a tabela `E_WATCH_ITEM` e a cláusula `WHERE WI_WL_ID = WL_ID`. Como o `WI_S_SYMB` é buscado diretamente após a filtragem, ter ambas as colunas no índice é benéfico.
+- **Tipo de Acesso:** Este índice ajuda em acessos por `JOIN` e `WHERE`.
+- **Redundância:** Não há índices existentes que cubram essa combinação de colunas.
+
+#### 1.2 Índice para `E_WATCH_LIST`
+
+```sql
+CREATE INDEX IX_E_WATCH_LIST_CUST_ID ON dbo.E_WATCH_LIST(WL_C_ID);
+```
+
+**Justificativa:**
+- **Coluna:** `WL_C_ID`
+- **Uso:** Este índice é importante para a condição `WHERE WL_C_ID = cust_id`, que filtra a lista de observação com base no ID do cliente.
+- **Tipo de Acesso:** Ajuda em acessos por `WHERE`.
+- **Redundância:** O índice `e_watch_list_indx1` já existe para `wl_c_id`, então este índice não é necessário.
+
+#### 1.3 Índice para `E_INDUSTRY`, `E_COMPANY` e `E_SECURITY`
+
+```sql
+CREATE INDEX IX_E_INDUSTRY_NAME ON dbo.E_INDUSTRY(IN_NAME);
+CREATE INDEX IX_E_COMPANY_IN_ID ON dbo.E_COMPANY(CO_IN_ID);
+CREATE INDEX IX_E_SECURITY_CO_ID ON dbo.E_SECURITY(S_CO_ID);
+```
+
+**Justificativa:**
+- **Colunas:** 
+  - `IN_NAME` na tabela `E_INDUSTRY` para a condição `WHERE IN_NAME = industry_name`.
+  - `CO_IN_ID` na tabela `E_COMPANY` para o `JOIN` com `E_SECURITY`.
+  - `S_CO_ID` na tabela `E_SECURITY` para o `JOIN` com `E_COMPANY`.
+- **Tipo de Acesso:** Esses índices ajudam em acessos por `WHERE` e `JOIN`.
+- **Redundância:** 
+  - O índice em `IN_NAME` é novo, mas é importante para o desempenho. 
+  - O índice em `CO_IN_ID` não é redundante, pois não existe um índice específico para essa coluna.
+  - O índice em `S_CO_ID` também é novo e necessário.
+
+#### 1.4 Índice para `E_HOLDING_SUMMARY`
+
+```sql
+CREATE INDEX IX_E_HOLDING_SUMMARY_CA_ID ON dbo.E_HOLDING_SUMMARY(HS_CA_ID);
+```
+
+**Justificativa:**
+- **Coluna:** `HS_CA_ID`
+- **Uso:** Este índice é útil para a consulta `WHERE HS_CA_ID = acct_id`, que busca os resumos de holding por conta.
+- **Tipo de Acesso:** Ajuda em acessos por `WHERE`.
+- **Redundância:** Nenhum índice existente cobre exclusivamente esta coluna em `E_HOLDING_SUMMARY`, então este é um novo índice necessário.
+
+### 2. Resumo das Sugestões
+
+- **IX_E_WATCH_ITEM_WL_ID_SYMB**: Novo índice para melhorar o acesso por `JOIN` e `WHERE` em `E_WATCH_ITEM`.
+- **IX_E_WATCH_LIST_CUST_ID**: Não necessário devido à redundância com `e_watch_list_indx1`.
+- **IX_E_INDUSTRY_NAME**, **IX_E_COMPANY_IN_ID**, **IX_E_SECURITY_CO_ID**: Novos índices que são necessários para melhorar o desempenho.
+- **IX_E_HOLDING_SUMMARY_CA_ID**: Novo índice necessário para melhorar as consultas.
+
+### Conclusão
+
+As sugestões de índices são baseadas na análise do pseudo-código e nas colunas utilizadas. É importante monitorar o desempenho após a implementação para ajustá-los conforme necessário, pois a criação de muitos índices pode impactar o desempenho de escrita.

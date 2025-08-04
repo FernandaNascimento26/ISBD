@@ -1,0 +1,33 @@
+Para a transação `trade-lookup`, analisando as consultas realizadas e as colunas envolvidas, proporei alguns índices que podem melhorar o desempenho das operações de busca, especialmente nas condições `WHERE`, e `JOIN`:
+
+### Índices Sugeridos
+
+1. **Índice sobre a tabela `E_TRADE`**
+   ```sql
+   CREATE INDEX idx_trade_acct_dts ON dbo.E_TRADE (t_ca_id, t_dts);
+   ```
+   **Explicação**: Este índice é útil para a consulta que filtra por `T_CA_ID` e `T_DTS` na primeira parte da transação `trade-lookup`. Ele permitirá que o SQL Server encontre rapidamente as transações para uma conta específica dentro de um intervalo de datas. Não há risco de redundância, pois não existe um índice que cubra exatamente essas duas colunas juntas.
+
+2. **Índice sobre a tabela `E_SETTLEMENT`**
+   ```sql
+   CREATE INDEX idx_settlement_tid ON dbo.E_SETTLEMENT (se_t_id);
+   ```
+   **Explicação**: Esse índice é necessário para as consultas que filtram por `SE_T_ID` na tabela `SETTLEMENT`. A consulta busca informações de liquidação para cada `trade_id`. Um índice nesta coluna melhorará o desempenho das buscas, pois `SE_T_ID` é utilizada em uma condição `WHERE`. Não existe um índice que cubra apenas essa coluna.
+
+3. **Índice sobre a tabela `E_CASH_TRANSACTION`**
+   ```sql
+   CREATE INDEX idx_cash_transaction_tid ON dbo.E_CASH_TRANSACTION (ct_t_id);
+   ```
+   **Explicação**: Este índice é necessário para as consultas que filtram por `CT_T_ID` quando um trade é uma transação em dinheiro, permitindo uma busca rápida. Assim como no caso anterior, não existe um índice que abranja especificamente essa coluna.
+
+4. **Índice sobre a tabela `E_TRADE_HISTORY`**
+   ```sql
+   CREATE INDEX idx_trade_history_tid ON dbo.E_TRADE_HISTORY (th_t_id, th_dts);
+   ```
+   **Explicação**: Este índice ajudará a otimizar a consulta que busca o histórico de trades por `TH_T_ID` e ordena por `TH_DTS`. Ele permitirá uma recuperação eficiente do histórico de transações para cada trade. Não há índices que cubram esta combinação exata.
+
+### Resumo
+
+Os índices sugeridos focam em colunas que são frequentemente filtradas e que não têm índices existentes que as cubram adequadamente. A criação desses índices pode melhorar significativamente o desempenho da transação `trade-lookup`, especialmente em ambientes com grandes volumes de dados.
+
+Caso os índices já existam ou sejam muito semelhantes a outros, isso deve ser avaliado através de um comando de consulta ao catálogo do banco de dados, mas com base na informação fornecida, os índices sugeridos são novos e otimizados para as consultas apresentadas.

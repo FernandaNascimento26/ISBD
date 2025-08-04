@@ -1,0 +1,39 @@
+Com base na transação `trade-result`, o foco principal está na recuperação de informações relacionadas a trades e contas de clientes, além de atualizações em várias tabelas. Vamos analisar os acessos e sugerir índices que podem otimizar essa transação.
+
+### Sugestões de Índices
+
+1. **Índice para a tabela `TRADE`**  
+   ```sql
+   CREATE INDEX IDX_TRADE_T_ID ON dbo.E_TRADE(T_ID);
+   ```
+   **Justificativa:**  
+   Este índice é crucial para a cláusula `WHERE T_ID = trade_id` na tabela `TRADE`. Ele melhorará a eficiência das buscas pela identificação do trade específico. Não há risco de redundância, uma vez que o índice existente `pk_e_trade` é uma chave primária, mas o índice sugerido pode ser útil, especialmente considerando que ele é um índice não único, permitindo buscas rápidas.
+
+2. **Índice para a tabela `HOLDING_SUMMARY`**  
+   ```sql
+   CREATE INDEX IDX_HOLDING_SUMMARY ON dbo.E_HOLDING_SUMMARY(HS_CA_ID, HS_S_SYMB);
+   ```
+   **Justificativa:**  
+   Este índice cobre a cláusula `WHERE HS_CA_ID = acct_id AND HS_S_SYMB = symbol`. A inclusão de ambas as colunas no índice melhorará a performance das consultas quando estivermos buscando a quantidade de ações que um cliente possui de um determinado símbolo. Esse índice não existe atualmente e é essencial para as operações de leitura.
+
+3. **Índice para a tabela `TRADE_TYPE`**  
+   ```sql
+   CREATE INDEX IDX_TRADE_TYPE ON dbo.E_TRADE_TYPE(TT_ID);
+   ```
+   **Justificativa:**  
+   Este índice se destina a otimizar a consulta `WHERE TT_ID = type_id` na tabela `TRADE_TYPE`. Embora o índice `e_trade_type_indx` já exista, ele abrange mais colunas que podem não ser necessárias para todas as consultas. Portanto, um índice simples para `TT_ID` pode resultar em uma busca mais eficiente para esta transação específica.
+
+4. **Índice para a tabela `CUSTOMER_ACCOUNT`**  
+   ```sql
+   CREATE INDEX IDX_CUSTOMER_ACCOUNT ON dbo.E_CUSTOMER_ACCOUNT(CA_ID);
+   ```
+   **Justificativa:**  
+   O acesso à tabela `CUSTOMER_ACCOUNT` faz uso da coluna `CA_ID`. Um índice nesta coluna irá acelerar a busca para obter informações do cliente. Embora o índice `pk_e_customer_account` já exista para `CA_ID`, um índice adicional pode ser útil se houver necessidade de otimizar ainda mais as operações de leitura específicas.
+
+### Alerta sobre Índices Existentes
+
+- Ao revisar os índices já existentes, percebi que a tabela `TRADE` já possui um índice primário (`pk_e_trade`) que cobre `T_ID`, e a tabela `HOLDING_SUMMARY` não possui índices que cubram adequadamente as colunas sendo acessadas. Portanto, é aconselhável implementar o índice sugerido para `HOLDING_SUMMARY`.
+
+### Conclusão
+
+Os índices sugeridos visam melhorar o desempenho da transação `trade-result` e não são redundantes em relação aos índices já existentes. A implementação desses índices deve resultar em um melhor tempo de resposta para as operações de leitura e escrita nesta transação.

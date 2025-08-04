@@ -1,0 +1,60 @@
+Para a transação `trade-status`, identificamos que as buscas estão sendo realizadas nas seguintes colunas:
+
+1. `T_CA_ID` (da tabela `E_TRADE`)
+2. `T_DTS` (da tabela `E_TRADE`)
+3. `T_ST_ID` (da tabela `E_TRADE`)
+4. `T_TT_ID` (da tabela `E_TRADE`)
+5. `T_S_SYMB` (da tabela `E_TRADE` e `E_SECURITY`)
+6. `EX_ID` (da tabela `E_SECURITY`)
+7. `CA_ID` (da tabela `E_CUSTOMER_ACCOUNT`)
+8. `C_ID` (da tabela `E_CUSTOMER`)
+9. `B_ID` (da tabela `E_BROKER`)
+
+### Proposta de Índices
+
+1. **Índice para a tabela `E_TRADE`**
+   ```sql
+   CREATE INDEX IX_E_TRADE_CA_DTS_ST_SYMB ON dbo.E_TRADE (T_CA_ID, T_DTS DESC, T_S_SYMB, T_ST_ID);
+   ```
+   **Justificativa**: 
+   - Este índice cobre as condições do `WHERE` e a ordenação `ORDER BY T_DTS DESC` da consulta. 
+   - `T_CA_ID` é utilizado para filtrar os trades de um cliente específico. 
+   - `T_DTS` em ordem decrescente ajuda a selecionar os 50 trades mais recentes.
+   - `T_S_SYMB` e `T_ST_ID` são utilizados nas junções. 
+   - Não existe um índice que cubra essa combinação de colunas com a ordem e a inclusão dos critérios de busca.
+
+2. **Índice para a tabela `E_SECURITY`**
+   ```sql
+   CREATE INDEX IX_E_SECURITY_SYMB_EX ON dbo.E_SECURITY (S_SYMB, S_EX_ID);
+   ```
+   **Justificativa**:
+   - Este índice é útil para a junção entre `E_TRADE` e `E_SECURITY` utilizando `T_S_SYMB` e `EX_ID`. 
+   - Facilita a filtragem e melhora a eficiência da junção. 
+   - Não há índices existentes que cubram essa combinação.
+
+3. **Índice para a tabela `E_CUSTOMER_ACCOUNT`**
+   ```sql
+   CREATE INDEX IX_E_CUSTOMER_ACCOUNT_ID ON dbo.E_CUSTOMER_ACCOUNT (CA_ID);
+   ```
+   **Justificativa**:
+   - Este índice permite a busca rápida do cliente na tabela `E_CUSTOMER_ACCOUNT` com base em `CA_ID`, que é utilizado para filtrar os dados do cliente.
+   - O índice já existente em `E_CUSTOMER_ACCOUNT` cobre `CA_ID`, mas a criação de um índice separado pode ser considerada dependendo do uso.
+
+4. **Índice para a tabela `E_CUSTOMER`**
+   ```sql
+   CREATE INDEX IX_E_CUSTOMER_ID ON dbo.E_CUSTOMER (C_ID);
+   ```
+   **Justificativa**:
+   - Este índice é para otimizar a busca de clientes pelo `C_ID` na tabela `E_CUSTOMER`, que é utilizado na junção.
+   - O índice existente (se houver) cobre suficientemente os acessos, mas uma verificação é necessária para garantir que não seja redundante.
+
+5. **Índice para a tabela `E_BROKER`**
+   ```sql
+   CREATE INDEX IX_E_BROKER_ID ON dbo.E_BROKER (B_ID);
+   ```
+   **Justificativa**:
+   - Este índice permite a busca eficiente de corretores pela coluna `B_ID`, que é utilizada na junção.
+   - Deve-se verificar se já existe um índice cobrindo essa coluna.
+
+### Conclusão
+Os índices propostos visam otimizar as buscas e junções da transação `trade-status`. É importante verificar se os índices sugeridos não são redundantes com os já existentes, especialmente para `CA_ID`, `C_ID`, e `B_ID`, que podem já estar cobertos por índices existentes. A inclusão de `T_DTS DESC` no índice de `E_TRADE` é uma adição significativa para melhorar o desempenho na ordenação.

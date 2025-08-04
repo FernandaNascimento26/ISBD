@@ -1,0 +1,40 @@
+Para a transação Broker-Volume, considerando o pseudo-código e as colunas utilizadas, sugerimos a criação de alguns índices que podem melhorar o desempenho. A consulta envolve múltiplas tabelas com condições específicas nas colunas de junção e filtro. 
+
+### Comandos `CREATE INDEX` sugeridos:
+
+1. **Índice para a tabela `E_TRADE_REQUEST`**
+```sql
+CREATE INDEX idx_trade_request_broker_security ON dbo.E_TRADE_REQUEST (TR_B_ID, TR_S_SYMB);
+```
+**Explicação:** 
+- Este índice cobre os filtros na cláusula `WHERE` para `TR_B_ID` e `TR_S_SYMB`, que são usados para unir tabelas e filtrar resultados. A inclusão desses campos melhora a eficiência da busca e a junção com a tabela `E_BROKER` e `E_SECURITY`. 
+- Não há risco de redundância, pois não existe um índice similar que cubra exatamente essas colunas em conjunto.
+
+2. **Índice para a tabela `E_SECURITY`**
+```sql
+CREATE INDEX idx_security_company ON dbo.E_SECURITY (S_SYMB, S_CO_ID);
+```
+**Explicação:**
+- Este índice é útil para a junção da tabela `E_SECURITY` com a tabela `E_COMPANY`, através da coluna `S_CO_ID`, além de ajudar na busca pelo símbolo de segurança `S_SYMB` que é utilizado na cláusula `WHERE`. 
+- Não existe um índice correspondente a essa combinação específica, então não há risco de redundância.
+
+3. **Índice para a tabela `E_COMPANY`**
+```sql
+CREATE INDEX idx_company_industry ON dbo.E_COMPANY (CO_IN_ID);
+```
+**Explicação:**
+- O índice na coluna `CO_IN_ID` é importante para a junção com a tabela `E_INDUSTRY`, que é utilizada na consulta. Isso melhora a eficiência da junção e da filtragem dos resultados.
+- Este índice também não se sobrepõe a outros já existentes.
+
+4. **Índice para a tabela `E_BROKER`**
+```sql
+CREATE INDEX idx_broker_name ON dbo.E_BROKER (B_NAME);
+```
+**Explicação:**
+- Este índice é crucial para a filtragem da consulta que usa `B_NAME` na cláusula `WHERE`. Isso melhora a performance ao buscar os brokers que estão na lista de brokers. 
+- Não há índices existentes cobrindo diretamente a coluna `B_NAME`.
+
+### Considerações Finais:
+- É importante monitorar o uso dos índices após a implementação, visto que a adição de índices pode afetar as operações de escrita.
+- A criação dos índices sugeridos não deve resultar em redundância, pois cada um cobre um cenário específico de filtragem ou junção que não está coberto pelos índices existentes. 
+- Se algum desses índices já existir em uma forma similar (variações de colunas ou ordens), será necessário ajustar as sugestões.

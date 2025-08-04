@@ -1,0 +1,57 @@
+Para a transação **Trade-Order**, vamos analisar as consultas e identificar as colunas que podem se beneficiar de novos índices. Vamos focar nas colunas utilizadas nas cláusulas `WHERE`, `JOIN` e `ORDER BY`, conforme indicado no pseudo-código fornecido.
+
+### Sugestões de Índices
+
+1. **Índice para a tabela `CUSTOMER_ACCOUNT`**
+   ```sql
+   CREATE INDEX IX_CustomerAccount_CA_ID 
+   ON dbo.E_CUSTOMER_ACCOUNT (CA_ID);
+   ```
+   **Justificativa**: Este índice é necessário para otimizar a consulta que busca informações na tabela `CUSTOMER_ACCOUNT` usando a coluna `CA_ID`. É uma coluna frequentemente utilizada em operações de busca, e como é uma chave primária, um índice é fundamental para melhorar a performance.
+
+2. **Índice para a tabela `CUSTOMER`**
+   ```sql
+   CREATE INDEX IX_Customer_C_ID 
+   ON dbo.E_CUSTOMER (C_ID);
+   ```
+   **Justificativa**: A tabela `CUSTOMER` é acessada usando a coluna `C_ID` para obter informações do cliente. Este índice irá acelerar a busca de clientes com base no ID.
+
+3. **Índice para a tabela `BROKER`**
+   ```sql
+   CREATE INDEX IX_Broker_B_ID 
+   ON dbo.E_BROKER (B_ID);
+   ```
+   **Justificativa**: A coluna `B_ID` na tabela `BROKER` é usada para buscar informações sobre o corretor. Um índice nesta coluna irá melhorar a performance das consultas que envolvem a busca de brokers.
+
+4. **Índice para a tabela `ACCOUNT_PERMISSION`**
+   ```sql
+   CREATE INDEX IX_AccountPermission_AP_CA_ID_FullName 
+   ON dbo.E_ACCOUNT_PERMISSION (AP_CA_ID, AP_F_NAME, AP_L_NAME, AP_TAX_ID);
+   ```
+   **Justificativa**: Este índice cobre a consulta que verifica permissões, utilizando `AP_CA_ID`, `AP_F_NAME`, `AP_L_NAME` e `AP_TAX_ID`. Como várias colunas são usadas na cláusula `WHERE`, um índice composto ajuda a acelerar esses tipos de consultas.
+
+5. **Índice para a tabela `HOLDING_SUMMARY`**
+   ```sql
+   CREATE INDEX IX_HoldingSummary_HS_CA_ID_S_SYMB 
+   ON dbo.E_HOLDING_SUMMARY (HS_CA_ID, HS_S_SYMB);
+   ```
+   **Justificativa**: Esse índice é útil para as consultas que buscam a quantidade de ações em `HOLDING_SUMMARY` com base em `HS_CA_ID` e `HS_S_SYMB`. Ele melhora a performance ao lidar com a busca de holdings para um cliente específico por símbolo.
+
+6. **Índice para a tabela `HOLDING`**
+   ```sql
+   CREATE INDEX IX_Holding_H_CA_ID_S_SYMB 
+   ON dbo.E_HOLDING (H_CA_ID, H_S_SYMB, H_DTS);
+   ```
+   **Justificativa**: O índice cobre as consultas que acessam a tabela `HOLDING` utilizando `H_CA_ID`, `H_S_SYMB` e ordenando por `H_DTS`. Isso ajuda na performance durante a recuperação de dados de holdings, especialmente considerando as operações de venda e compra.
+
+### Verificação de Redundância
+
+- **Verifique se o índice `IX_CustomerAccount_CA_ID`** já não existe. A tabela `E_CUSTOMER_ACCOUNT` deve ter um índice na chave primária `CA_ID`, que já cobre essa consulta.
+- **Verifique se o índice `IX_Customer_C_ID`** está coberto pela chave primária da tabela `E_CUSTOMER`.
+- **Verifique se o índice `IX_Broker_B_ID`** está coberto pela chave primária da tabela `E_BROKER`.
+- **Verifique se o índice `IX_AccountPermission_AP_CA_ID_FullName`** é necessário, caso já exista um índice que cubra as colunas `AP_CA_ID`, `AP_F_NAME`, `AP_L_NAME` e `AP_TAX_ID`.
+- **Verifique se o índice `IX_HoldingSummary_HS_CA_ID_S_SYMB`** já existe, pois a tabela `E_HOLDING_SUMMARY` pode já ter um índice sobre essas colunas.
+- **Verifique se o índice `IX_Holding_H_CA_ID_S_SYMB`** está duplicando um índice existente, caso haja índices que já cobrem as colunas `H_CA_ID` e `H_S_SYMB`.
+
+### Conclusão
+Os índices sugeridos são baseados nas consultas mais críticas da transação Trade-Order. Ao criar esses índices, você deve garantir que não haja redundância, pois isso pode impactar negativamente o desempenho de inserções e atualizações no banco de dados.

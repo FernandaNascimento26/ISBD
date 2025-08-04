@@ -1,0 +1,45 @@
+Para a transação **Security-Detail**, que envolve diversas tabelas e colunas, sugiro os seguintes comandos `CREATE INDEX` para otimizar as consultas. Vou me concentrar nas colunas que são usadas nas cláusulas `WHERE` e `JOIN`, além de considerar as colunas usadas nas ordenações.
+
+### Índices Sugeridos
+
+1. **Índice para a tabela `E_SECURITY`**:
+   ```sql
+   CREATE INDEX IX_E_SECURITY_SYMB ON dbo.E_SECURITY(S_SYMB);
+   ```
+   **Justificativa**: Este índice ajuda a otimizar a busca da segurança pelo símbolo (`S_SYMB`) na cláusula `WHERE`, onde o símbolo é um dos principais critérios de filtragem. Não existe um índice existente que cubra esta coluna.
+
+2. **Índice para a tabela `E_COMPANY`**:
+   ```sql
+   CREATE INDEX IX_E_COMPANY_CO_ID ON dbo.E_COMPANY(CO_ID);
+   ```
+   **Justificativa**: Este índice acelera a busca pela empresa usando o `CO_ID` na cláusula `WHERE`, onde `CO_ID` é utilizado em um JOIN com a tabela `E_SECURITY`. Até o momento, não há um índice existente que cubra essa coluna de forma individual.
+
+3. **Índice para a tabela `E_ADDRESS`**:
+   ```sql
+   CREATE INDEX IX_E_ADDRESS_AD_ID ON dbo.E_ADDRESS(AD_ID);
+   ```
+   **Justificativa**: Este índice é útil para a busca da tabela `E_ADDRESS` através da coluna `AD_ID`, que é utilizada na consulta para unir com a tabela `E_COMPANY`. Não há um índice existente que cubra esta coluna.
+
+4. **Índice para a tabela `E_ZIP_CODE`**:
+   ```sql
+   CREATE INDEX IX_E_ZIP_CODE_ZC_CODE ON dbo.E_ZIP_CODE(ZC_CODE);
+   ```
+   **Justificativa**: Este índice melhorará o desempenho nas buscas por `ZC_CODE`, que é utilizado em filtros e joins. Novamente, não existe um índice que cubra especificamente esta coluna.
+
+5. **Índice para a tabela `E_DAILY_MARKET`**:
+   ```sql
+   CREATE INDEX IX_E_DAILY_MARKET_S_SYMB_DATE ON dbo.E_DAILY_MARKET(DM_S_SYMB, DM_DATE);
+   ```
+   **Justificativa**: Esse índice composto é útil para as consultas que filtram tanto pelo símbolo do mercado (`DM_S_SYMB`) quanto pela data (`DM_DATE`). Isso é relevante para a parte final da transação onde as informações de mercado são recuperadas. Não há um índice existente que cubra essa combinação.
+
+6. **Índice para a tabela `E_FINANCIAL`**:
+   ```sql
+   CREATE INDEX IX_E_FINANCIAL_CO_ID ON dbo.E_FINANCIAL(FI_CO_ID);
+   ```
+   **Justificativa**: Este índice ajuda a otimizar a busca para a tabela `E_FINANCIAL` pela coluna `FI_CO_ID`, que é utilizada na cláusula `WHERE` da transação. Não existe um índice que cubra suficientemente esta coluna.
+
+### Considerações Finais
+
+Os índices sugeridos são necessários para melhorar o desempenho das consultas que fazem parte da transação `Security-Detail`, principalmente em relação aos filtros e joins. É importante monitorar o impacto dos novos índices no desempenho geral do sistema, uma vez que a criação excessiva de índices pode afetar a performance de inserções e atualizações.
+
+Se a aplicação de novos índices não for viável, considere ajustar as consultas para otimizar o uso dos índices existentes, ou realizar análises de execução para identificar gargalos específicos.

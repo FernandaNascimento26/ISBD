@@ -1,0 +1,22 @@
+Para a transação **Market-Feed**, que envolve a atualização da tabela `E_LAST_TRADE` e a seleção de registros da tabela `E_TRADE_REQUEST`, podemos considerar a criação de índices que ajudem a otimizar essas operações. Aqui estão as sugestões:
+
+### 1. Índice para `E_LAST_TRADE`
+```sql
+CREATE INDEX IX_E_LAST_TRADE_LT_S_SYMB ON dbo.E_LAST_TRADE (LT_S_SYMB);
+```
+**Justificativa**: 
+- Este índice é útil para a operação de `UPDATE` na tabela `E_LAST_TRADE`, onde a cláusula `WHERE` filtra os registros com base em `LT_S_SYMB`. 
+- A inclusão deste índice permitirá que o SQL Server encontre rapidamente as linhas a serem atualizadas, melhorando a performance da transação.
+- **Risco de redundância**: Este índice não é redundante, pois não há índices que cubram diretamente o `LT_S_SYMB` de forma otimizada para operações de atualização.
+
+### 2. Índice para `E_TRADE_REQUEST`
+```sql
+CREATE INDEX IX_E_TRADE_REQUEST_TR_S_SYMB_TR_TT_ID_TR_BID_PRICE ON dbo.E_TRADE_REQUEST (TR_S_SYMB, TR_TT_ID, TR_BID_PRICE);
+```
+**Justificativa**:
+- Este índice é projetado para otimizar a consulta que busca registros da tabela `E_TRADE_REQUEST` com base em `TR_S_SYMB` e `TR_TT_ID`, além de facilitar a filtragem por `TR_BID_PRICE`.
+- Ele melhora o desempenho da transação ao permitir uma busca mais eficiente dos registros que atendem às condições de preço e tipo de ordem (stop-loss, limit-sell, limit-buy).
+- **Risco de redundância**: Embora a tabela já tenha um índice denominado `e_trade_request_indx2`, que cobre `TR_S_SYMB`, `TR_T_ID`, `TR_TT_ID`, `TR_BID_PRICE`, e `TR_QTY`, ele não é exatamente o mesmo que o sugerido, pois o novo índice elimina `TR_QTY` e se concentra nas colunas mais relevantes para a lógica da transação, o que pode reduzir a sobrecarga.
+
+### Resumo
+Os índices sugeridos devem proporcionar uma melhoria significativa no desempenho da transação Market-Feed ao permitir buscas mais rápidas e atualizações mais eficientes. A criação do índice em `E_LAST_TRADE` é especialmente importante para a atualização, enquanto o índice em `E_TRADE_REQUEST` assegura que a seleção de ordens pendentes seja realizada de forma otimizada. É importante monitorar a performance após a criação dos índices para garantir que eles tragam os benefícios esperados.

@@ -1,0 +1,41 @@
+Para a transação **trade-update**, vamos analisar as consultas SQL presentes no pseudo-código e sugerir índices que possam otimizar o desempenho.
+
+### Análise do Pseudo-Código
+O pseudo-código da transação faz várias seleções e atualizações nas tabelas `TRADE`, `SETTLEMENT`, `CASH_TRANSACTION` e `TRADE_HISTORY`. As principais colunas que são utilizadas nas cláusulas `WHERE` e `ORDER BY` incluem:
+
+- `TRADE`: `T_ID`, `T_CA_ID`, `T_TT_ID`, `T_DTS`, `T_EXEC_NAME`, `T_S_SYMB`, `T_IS_CASH`
+- `SETTLEMENT`: `SE_T_ID`
+- `CASH_TRANSACTION`: `CT_T_ID`
+- `TRADE_HISTORY`: `TH_T_ID`
+
+### Índices Sugeridos
+
+1. **Índice na tabela TRADE**
+   ```sql
+   CREATE NONCLUSTERED INDEX IX_TRADE_T_ID ON dbo.E_TRADE (T_ID);
+   ```
+   **Justificativa**: Este índice é necessário pois `T_ID` é usado nas cláusulas `WHERE` para buscar informações específicas de trades. A tabela `TRADE` já possui um índice único (`pk_e_trade`), mas esse índice adicional pode ser benéfico para melhorar o desempenho da busca, especialmente em operações onde apenas `T_ID` é utilizado.
+
+2. **Índice na tabela SETTLEMENT**
+   ```sql
+   CREATE NONCLUSTERED INDEX IX_SETTLEMENT_SE_T_ID ON dbo.E_SETTLEMENT (SE_T_ID);
+   ```
+   **Justificativa**: Este índice é útil para as consultas que buscam informações da tabela `SETTLEMENT` usando a coluna `SE_T_ID`. Ele ajudará a otimizar as seleções de dados de liquidação associadas aos trades.
+
+3. **Índice na tabela CASH_TRANSACTION**
+   ```sql
+   CREATE NONCLUSTERED INDEX IX_CASH_TRANSACTION_CT_T_ID ON dbo.E_CASH_TRANSACTION (CT_T_ID);
+   ```
+   **Justificativa**: Este índice é importante porque a coluna `CT_T_ID` é utilizada nas consultas para buscar informações de transações em dinheiro associadas a um trade. Um índice nesta coluna irá acelerar as buscas realizadas nesta tabela.
+
+4. **Índice na tabela TRADE_HISTORY**
+   ```sql
+   CREATE NONCLUSTERED INDEX IX_TRADE_HISTORY_TH_T_ID ON dbo.E_TRADE_HISTORY (TH_T_ID, TH_DTS);
+   ```
+   **Justificativa**: Neste caso, `TH_T_ID` é utilizado nas cláusulas `WHERE`, e a adição de `TH_DTS` ao índice pode ajudar em consultas que ordenam por data, como indicado no pseudo-código. Esse índice é especialmente útil para melhorar a performance ao acessar o histórico de trades.
+
+### Alerta de Redundância
+É importante ressaltar que a tabela `E_TRADE` já possui um índice único que cobre `T_ID`. Portanto, a criação de um índice separado para `T_ID` pode ser considerada redundante. Ao analisar os outros índices sugeridos, não existem índices existentes que cubram exatamente `SE_T_ID` na tabela `SETTLEMENT`, `CT_T_ID` na tabela `CASH_TRANSACTION` e `TH_T_ID` na tabela `TRADE_HISTORY` de forma eficiente.
+
+### Conclusão
+Os índices sugeridos devem melhorar o desempenho da transação trade-update sem criar redundâncias significativas, uma vez que alguns dos índices já existentes não cobrem as colunas sugeridas. É sempre recomendável monitorar o desempenho após a implementação dos índices para avaliar a eficácia das otimizações.

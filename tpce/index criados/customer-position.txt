@@ -1,0 +1,44 @@
+Para a transação Customer-Position, vamos analisar as consultas fornecidas e sugerir índices que possam otimizar o desempenho. Aqui estão os comandos `CREATE INDEX` propostos, seguidos de uma breve explicação para cada um.
+
+### Criar Índices Sugeridos
+
+1. **Índice para a Tabela `E_CUSTOMER`**
+   ```sql
+   CREATE NONCLUSTERED INDEX IX_E_CUSTOMER_C_TAX_ID ON dbo.E_CUSTOMER (C_TAX_ID);
+   ```
+   **Explicação**: Este índice é útil para a consulta que busca o `C_ID` com base no `C_TAX_ID`. Isso otimiza a cláusula `WHERE C_TAX_ID = tax_id`, permitindo uma busca mais rápida pelo cliente. 
+
+2. **Índice para a Tabela `E_CUSTOMER_ACCOUNT`**
+   ```sql
+   CREATE NONCLUSTERED INDEX IX_E_CUSTOMER_ACCOUNT_CA_C_ID ON dbo.E_CUSTOMER_ACCOUNT (CA_C_ID);
+   ```
+   **Explicação**: Este índice ajudará na consulta que busca informações na tabela `E_CUSTOMER_ACCOUNT` onde `CA_C_ID = cust_id`. Assim, a busca por contas de clientes será mais eficiente.
+
+3. **Índice para a Tabela `E_HOLDING_SUMMARY`**
+   ```sql
+   CREATE NONCLUSTERED INDEX IX_E_HOLDING_SUMMARY_HS_CA_ID ON dbo.E_HOLDING_SUMMARY (HS_CA_ID, HS_S_SYMB);
+   ```
+   **Explicação**: Este índice é recomendável, pois a consulta realiza um `LEFT JOIN` na tabela `E_HOLDING_SUMMARY` onde `HS_CA_ID = CA_ID` e `LT_S_SYMB = HS_S_SYMB`. O índice em `HS_CA_ID` e `HS_S_SYMB` ajudará a acelerar esse processo.
+
+4. **Índice para a Tabela `E_LAST_TRADE`**
+   ```sql
+   CREATE NONCLUSTERED INDEX IX_E_LAST_TRADE_LT_S_SYMB ON dbo.E_LAST_TRADE (LT_S_SYMB);
+   ```
+   **Explicação**: Esse índice será útil para otimizar a consulta que envolve `LT_S_SYMB` na tabela `E_LAST_TRADE`, especialmente para buscar o preço mais recente de ações.
+
+5. **Índice para a Tabela `E_TRADE`**
+   ```sql
+   CREATE NONCLUSTERED INDEX IX_E_TRADE_T_CA_ID ON dbo.E_TRADE (T_CA_ID);
+   ```
+   **Explicação**: Esse índice ajudará a otimizar as consultas que filtram a tabela `E_TRADE` pelo `T_CA_ID`, que é utilizado na transação para obter o histórico de trades de um cliente específico.
+
+### Verificação de Redundância
+
+- Os índices sugeridos foram analisados quanto à redundância. O índice `IX_E_CUSTOMER_C_TAX_ID` é único, pois não existe um índice existente que cubra `C_TAX_ID`.
+- O índice `IX_E_CUSTOMER_ACCOUNT_CA_C_ID` também é único e não existe um índice similar.
+- O índice `IX_E_HOLDING_SUMMARY_HS_CA_ID` não é redundante, pois não há um índice existente que cobre tanto `HS_CA_ID` quanto `HS_S_SYMB`.
+- O índice `IX_E_LAST_TRADE_LT_S_SYMB` e `IX_E_TRADE_T_CA_ID` são novos e não duplicam índices existentes.
+
+### Conclusão
+
+Os índices sugeridos são projetados para otimizar o desempenho da transação Customer-Position, abordando as cláusulas `WHERE` e `JOIN` nas consultas. Nenhum dos índices propostos é redundante com os já existentes, e a criação deles deve resultar em uma melhoria significativa no tempo de execução das transações.
